@@ -53,11 +53,13 @@ namespace DotNetCoreSqlDb.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Description,CreatedDate")] Todo todo)
+        public async Task<IActionResult> Create([Bind("Description,CreatedDate")] Todo todo)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(todo);
+                var id = _context.Todo.DefaultIfEmpty().Max(t => t != null ? t.ID : 0) + 1;
+
+                _context.Add(new Todo() {ID = id, Description = todo.Description, CreatedDate = todo.CreatedDate });
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
