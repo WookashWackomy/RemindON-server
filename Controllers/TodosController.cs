@@ -9,11 +9,12 @@ using DotNetCoreSqlDb.Models;
 
 namespace DotNetCoreSqlDb.Controllers
 {
+    [Route("api/todos")]
     public class TodosController : Controller
     {
-        private readonly MyDatabaseContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public TodosController(MyDatabaseContext context)
+        public TodosController(ApplicationDbContext context)
         {
             _context = context;
         }
@@ -25,6 +26,7 @@ namespace DotNetCoreSqlDb.Controllers
         }
 
         // GET: Todos/Details/5
+        [Route("details/{id}")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -43,6 +45,7 @@ namespace DotNetCoreSqlDb.Controllers
         }
 
         // GET: Todos/Create
+        [Route("create")]
         public IActionResult Create()
         {
             return View();
@@ -53,13 +56,14 @@ namespace DotNetCoreSqlDb.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Route("create")]
         public async Task<IActionResult> Create([Bind("Description,CreatedDate")] Todo todo)
         {
             if (ModelState.IsValid)
             {
-                var id = _context.Todo.DefaultIfEmpty().Max(t => t != null ? t.ID : 0) + 1;
+                //var id = _context.Todo.DefaultIfEmpty().Max(t => t != null ? t.ID : 0) + 1;
 
-                _context.Add(new Todo() {ID = id, Description = todo.Description, CreatedDate = todo.CreatedDate });
+                _context.Add(new Todo() { Description = todo.Description, CreatedDate = todo.CreatedDate });
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -67,6 +71,7 @@ namespace DotNetCoreSqlDb.Controllers
         }
 
         // GET: Todos/Edit/5
+        [Route("edit/{id}")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -87,6 +92,7 @@ namespace DotNetCoreSqlDb.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Route("edit/{id}")]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Description,CreatedDate")] Todo todo)
         {
             if (id != todo.ID)
@@ -118,6 +124,7 @@ namespace DotNetCoreSqlDb.Controllers
         }
 
         // GET: Todos/Delete/5
+        [Route("delete/{id}")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -138,6 +145,7 @@ namespace DotNetCoreSqlDb.Controllers
         // POST: Todos/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Route("delete/{id}")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var todo = await _context.Todo.FindAsync(id);

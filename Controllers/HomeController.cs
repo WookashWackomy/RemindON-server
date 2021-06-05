@@ -8,6 +8,7 @@ using DotNetCoreSqlDb.Models;
 
 namespace DotNetCoreSqlDb.Controllers
 {
+    [Route("")]
     public class HomeController : Controller
     {
         public IActionResult Index()
@@ -15,11 +16,13 @@ namespace DotNetCoreSqlDb.Controllers
             return View();
         }
 
+        [Route("privacy")]
         public IActionResult Privacy()
         {
             return View();
         }
 
+        [Route("error")]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
