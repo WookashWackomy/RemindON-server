@@ -90,7 +90,8 @@ namespace RemindONServer.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<RemindONDevice>> RegisterDevice([FromBody] RegistrationDeviceViewModel deviceViewModel)
         {
-            //TODO checki na już istniejące
+            if (_context.RemindONDevices.FirstOrDefault(d => d.SerialNumber == deviceViewModel.SerialNumber) == null)
+                return StatusCode(StatusCodes.Status409Conflict);
             var password = RandomString(10);
             var model = new RemindONDevice
             {
