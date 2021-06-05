@@ -26,11 +26,13 @@ namespace RemindONServer.Controllers
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
+
         // GET api/embedded/time
         [HttpGet("time")]
-        public ActionResult<DateTime> GetTime()
+        public ActionResult<string> GetTime()
         {
-            return DateTime.Now;
+            var currentDate = DateTime.Now;
+            return $"{currentDate:yyyy-MM-dd HH:mm:ss} {(int)currentDate.DayOfWeek}";
         }
 
         // GET api/embedded/devices/{serialNumber}/prescriptions
