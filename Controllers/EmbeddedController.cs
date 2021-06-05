@@ -35,8 +35,8 @@ namespace RemindONServer.Controllers
             return $"{currentDate:yyyy-MM-dd HH:mm:ss} {(int)currentDate.DayOfWeek}";
         }
 
-        // GET api/embedded/devices/{serialNumber}/prescriptions
-        [HttpGet("devices/{serialNumber}/prescriptions")]
+        // GET api/embedded/prescriptions
+        [HttpGet("prescriptions")]
         public async Task<ActionResult<IEnumerable<PrescriptionViewModel>>> GetPrescriptionsForDevice([FromRoute] string serialNumber)
         {
             var device = _context.RemindONDevices.FirstOrDefault(d => d.SerialNumber == serialNumber);
