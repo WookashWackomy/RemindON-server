@@ -48,19 +48,21 @@ namespace RemindONServer.Auth
             }
 
             // Get authorization key
-            var authorizationHeader = Request.Headers["Authorization"].ToString();
-            var authHeaderRegex = new Regex(@"Basic (.*)");
+            //var authorizationHeader = Request.Headers["Authorization"].ToString();
+            //var authHeaderRegex = new Regex(@"Basic (.*)");
 
-            if (!authHeaderRegex.IsMatch(authorizationHeader))
-            {
-                return Task.FromResult(AuthenticateResult.Fail("Authorization code not formatted properly."));
-            }
+            //if (!authHeaderRegex.IsMatch(authorizationHeader))
+            //{
+            //    return Task.FromResult(AuthenticateResult.Fail("Authorization code not formatted properly."));
+            //}
 
             try
             {
-                var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
-                var credentialBytes = Convert.FromBase64String(authHeader.Parameter);
-                var credentials = Encoding.UTF8.GetString(credentialBytes).Split(new[] { ':' }, 2);
+                //var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]).Parameter;
+                var authHeader = Request.Headers["Authorization"].ToString();
+                //var credentialBytes = Convert.FromBase64String(authHeader.Parameter);
+                // var credentials = Encoding.UTF8.GetString(credentialBytes).Split(new[] { ':' }, 2);
+                var credentials = authHeader.Split(new[] { ':' }, 2);
                 var serialNumber = credentials[0];
                 var password = credentials[1];
 
