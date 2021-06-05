@@ -99,12 +99,7 @@ namespace RemindONServer.Controllers
                 return new BadRequestObjectResult(new { Message = "User Registration Failed" });
             }
 
-            if (registerModel.Password != registerModel.ConfirmPassword)
-            {
-                return new BadRequestObjectResult(new { Message = "User Registration Failed - passwords don't match" });
-            }
-
-            var identityUser = new User { UserName = registerModel.Email, FirstName = registerModel.FirstName, LastName = registerModel.LastName };
+            var identityUser = new User { UserName = registerModel.Email, FirstName = registerModel.FirstName, LastName = registerModel.SecondName, Password = registerModel.Password };
             var result = await _userManager.CreateAsync(identityUser, registerModel.Password);
             if (!result.Succeeded)
             {
@@ -132,7 +127,7 @@ namespace RemindONServer.Controllers
             var identityUser = await _userManager.FindByEmailAsync(loginModel.Email);
             if (identityUser == null)
             {
-                return new BadRequestObjectResult(new { Message = "Login failed" });
+                return new BadRequestObjectResult(new { Message = "Login failed - user has not been found" });
             }
 
             var result = _userManager.PasswordHasher.VerifyHashedPassword(identityUser, identityUser.PasswordHash, loginModel.Password);
