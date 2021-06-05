@@ -28,7 +28,6 @@ namespace RemindONServer.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -50,7 +49,7 @@ namespace RemindONServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Check",
+                name: "Checks",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -61,11 +60,11 @@ namespace RemindONServer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Check", x => x.ID);
+                    table.PrimaryKey("PK_Checks", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Prescription",
+                name: "Prescriptions",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -78,22 +77,21 @@ namespace RemindONServer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Prescription", x => x.ID);
+                    table.PrimaryKey("PK_Prescriptions", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
-                name: "RemindONDevice",
+                name: "RemindONDevices",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SerialNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SerialNumber = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LastSeen = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    LastSeen = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RemindONDevice", x => x.ID);
+                    table.PrimaryKey("PK_RemindONDevices", x => x.SerialNumber);
                 });
 
             migrationBuilder.CreateTable(
@@ -274,13 +272,13 @@ namespace RemindONServer.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Check");
+                name: "Checks");
 
             migrationBuilder.DropTable(
-                name: "Prescription");
+                name: "Prescriptions");
 
             migrationBuilder.DropTable(
-                name: "RemindONDevice");
+                name: "RemindONDevices");
 
             migrationBuilder.DropTable(
                 name: "Todo");

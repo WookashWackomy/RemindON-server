@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace RemindONServer.Enums
 {
-    public enum Flag
+    public enum @bool
     {
         DefaultFlag
     }

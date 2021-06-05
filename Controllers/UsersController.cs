@@ -13,64 +13,60 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using RemindONServer.Auth;
 
 namespace RemindONServer.Controllers
 {
     [Route("api/user")]
     [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+    [Authorize("ShouldBeAnUser")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class UserController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
 
-        public UsersController(ApplicationDbContext context, UserManager<User> userManager)
+        public UserController(ApplicationDbContext context, UserManager<User> userManager)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
-        // GET: api/Users
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        // GET: api/user/info
+        [HttpGet("info")]
+        public async Task<ActionResult<UserInfoViewModel>> GetUser()
         {
-            return await _context.User.ToListAsync();
+            var identityUser = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+            return new UserInfoViewModel { FirstName = identityUser.FirstName, SecondName = identityUser.LastName, Email = identityUser.Email };
         }
 
-        // GET: api/Users/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(string id)
+
+        // PUT: api/user
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut]
+        public async Task<IActionResult> PutUser([FromBody] RegisterViewModel userModel)
         {
-            var user = await _context.User.FindAsync(id);
+            if (!ModelState.IsValid)
+                return BadRequest("Not a valid model");
+
+            var user = _context.User.Where(u => u.Email == userModel.Email).FirstOrDefault();
 
             if (user == null)
             {
                 return NotFound();
             }
 
-            return user;
-        }
-
-
-        // PUT: api/Users/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(string id, User user)
-        {
-            if (id != user.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(user).State = EntityState.Modified;
-
             try
             {
+                user.Email = userModel.Email != null ? userModel.Email : user.Email;
+                user.FirstName = userModel.FirstName != null ? userModel.FirstName : user.FirstName;
+                user.LastName = userModel.SecondName != null ? userModel.SecondName : user.LastName;
+                user.PasswordHash = userModel.Password != null ? _userManager.PasswordHasher.HashPassword(user, userModel.Password) : user.PasswordHash;
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserExists(id))
+                if (!UserExists(userModel.Email))
                 {
                     return NotFound();
                 }
@@ -83,7 +79,7 @@ namespace RemindONServer.Controllers
             return NoContent();
         }
 
-        // POST: api/Users
+        // POST: api/user
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("register")]
         [AllowAnonymous]
@@ -99,7 +95,7 @@ namespace RemindONServer.Controllers
                 return new BadRequestObjectResult(new { Message = "User Registration Failed" });
             }
 
-            var identityUser = new User { UserName = registerModel.Email, FirstName = registerModel.FirstName, LastName = registerModel.SecondName, Password = registerModel.Password };
+            var identityUser = new User { UserName = registerModel.Email, FirstName = registerModel.FirstName, LastName = registerModel.SecondName, Email = registerModel.Email };
             var result = await _userManager.CreateAsync(identityUser, registerModel.Password);
             if (!result.Succeeded)
             {
@@ -139,7 +135,8 @@ namespace RemindONServer.Controllers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, identityUser.Email),
-                new Claim(ClaimTypes.Name, identityUser.UserName)
+                new Claim(ClaimTypes.Name, identityUser.UserName),
+                new Claim (ClaimTypes.Role, Roles.StandardUser)
             };
 
             var claimsIdentity = new ClaimsIdentity(
@@ -160,7 +157,7 @@ namespace RemindONServer.Controllers
             return Ok(new { Message = "You are logged out" });
         }
 
-        // DELETE: api/Users/5
+        // DELETE: api/user/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(string id)
         {
@@ -176,9 +173,9 @@ namespace RemindONServer.Controllers
             return NoContent();
         }
 
-        private bool UserExists(string id)
+        private bool UserExists(string email)
         {
-            return _context.User.Any(e => e.Id == id);
+            return _context.User.Any(e => e.Email == email);
         }
     }
 }

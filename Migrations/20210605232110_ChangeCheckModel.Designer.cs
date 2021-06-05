@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace RemindONServer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210605174951_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20210605232110_ChangeCheckModel")]
+    partial class ChangeCheckModel
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -181,9 +181,8 @@ namespace RemindONServer.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Flag")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("Flag")
+                        .HasColumnType("bit");
 
                     b.Property<int>("PrescriptionID")
                         .HasColumnType("int");
@@ -193,7 +192,7 @@ namespace RemindONServer.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Check");
+                    b.ToTable("Checks");
                 });
 
             modelBuilder.Entity("RemindONServer.Models.Prescription", b =>
@@ -220,28 +219,26 @@ namespace RemindONServer.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Prescription");
+                    b.ToTable("Prescriptions");
                 });
 
             modelBuilder.Entity("RemindONServer.Models.RemindONDevice", b =>
                 {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<string>("SerialNumber")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("LastSeen")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("SerialNumber")
+                    b.Property<string>("Password")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("ID");
+                    b.HasKey("SerialNumber");
 
-                    b.ToTable("RemindONDevice");
+                    b.ToTable("RemindONDevices");
                 });
 
             modelBuilder.Entity("RemindONServer.Models.User", b =>
@@ -284,11 +281,6 @@ namespace RemindONServer.Migrations
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");

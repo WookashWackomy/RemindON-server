@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using RemindONServer.Controllers.Utils;
 using RemindONServer.Models;
+using RemindONServer.Auth;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DotNetCoreSqlDb
 {
@@ -29,10 +32,10 @@ namespace DotNetCoreSqlDb
             services.AddControllersWithViews();
             services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("DB_MAIN")));
-            services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true)
-                    .AddEntityFrameworkStores<ApplicationDbContext>();
-            services.Configure<IdentityOptions>(options =>
+            services.AddDefaultIdentity<User>(options =>
             {
+                options.SignIn.RequireConfirmedAccount = true;
+
                 // Password settings.
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
@@ -49,8 +52,12 @@ namespace DotNetCoreSqlDb
                 // User settings.
                 options.User.AllowedUserNameCharacters =
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-                options.User.RequireUniqueEmail = false;
-            });
+                options.User.RequireUniqueEmail = true;
+            })
+             .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            //services.AddIdentityCore<RemindONDevice>().AddEntityFrameworkStores<ApplicationDbContext>();
+
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
@@ -61,7 +68,21 @@ namespace DotNetCoreSqlDb
                 options.Events.OnRedirectToLogin = ResponseHelpers.UnAuthorizedResponse;
                 options.SlidingExpiration = true;
                 options.ExpireTimeSpan = new TimeSpan(0, 1, 0);
-            });
+            })
+            .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", options => { });
+
+            services.AddAuthorization(config =>
+                {
+                    config.AddPolicy("ShouldBeAnUser", options =>
+                    {
+                        options.RequireAuthenticatedUser();
+                        options.AuthenticationSchemes.Add(
+                                CookieAuthenticationDefaults.AuthenticationScheme);
+                        options.Requirements.Add(new ShouldBeAnUserRequirement());
+                    });
+
+                    config.AddPolicy("BasicAuthentication", new AuthorizationPolicyBuilder("BasicAuthentication").RequireAuthenticatedUser().Build());
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

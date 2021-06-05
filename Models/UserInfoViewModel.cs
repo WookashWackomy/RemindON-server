@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RemindONServer.Models
 {
-    public class User : IdentityUser
+    public class UserInfoViewModel
     {
         [Required]
         [PersonalData]
@@ -15,6 +15,9 @@ namespace RemindONServer.Models
 
         [Required]
         [PersonalData]
-        public string LastName { get; set; }
+        public string SecondName { get; set; }
+        [Required]
+        [PersonalData]
+        public string Email { get; set; }
     }
 }

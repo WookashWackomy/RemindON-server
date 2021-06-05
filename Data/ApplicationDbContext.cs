@@ -17,10 +17,10 @@ namespace DotNetCoreSqlDb.Models
         {
         }
 
-        public DbSet<RemindONServer.Models.RemindONDevice> RemindONDevice { get; set; }
+        public DbSet<RemindONServer.Models.RemindONDevice> RemindONDevices { get; set; }
         public DbSet<RemindONServer.Models.User> User { get; set; }
-        public DbSet<RemindONServer.Models.Prescription> Prescription { get; set; }
-        public DbSet<RemindONServer.Models.Check> Check { get; set; }
+        public DbSet<RemindONServer.Models.Prescription> Prescriptions { get; set; }
+        public DbSet<RemindONServer.Models.Check> Checks { get; set; }
         public DbSet<DotNetCoreSqlDb.Models.Todo> Todo { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -38,13 +38,6 @@ namespace DotNetCoreSqlDb.Models
                 .HasConversion(
                     v => JsonConvert.SerializeObject(v),
                     v => JsonConvert.DeserializeObject<List<DayOfWeek>>(v));
-
-            modelBuilder
-                .Entity<Check>()
-                .Property(e => e.Flag)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => (Flag)Enum.Parse(typeof(Flag), v));
 
             base.OnModelCreating(modelBuilder);
         }
