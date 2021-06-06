@@ -13,6 +13,6 @@ namespace RemindONServer.Models
         public string text1 { get; set; }
         public string text2 { get; set; }
         public List<DayOfWeek> WeekDays { get; set; }
-        public List<DateTime> DayTimes { get; set; }
+        public List<TimeSpan> DayTimes { get; set; }
     }
 }

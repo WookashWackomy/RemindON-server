@@ -102,6 +102,21 @@ namespace RemindONServer.Controllers
             _context.RemindONDevices.Add(model);
             await _context.SaveChangesAsync();
 
+            //temp code
+            var prescription = new Prescription
+            {
+                DeviceSerialNumber = deviceViewModel.SerialNumber,
+                text1 = "print pies",
+                text2 = "print php",
+                WeekDays = new List<DayOfWeek> { DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Friday },
+                DayTimes = new List<TimeSpan> { new TimeSpan(8, 0, 0), new TimeSpan(10, 0, 0), new TimeSpan(12, 0, 0) }
+            };
+
+            _context.RemindONDevices.Add(model);
+            await _context.SaveChangesAsync();
+
+
+
             return new ObjectResult(model.Password) { StatusCode = StatusCodes.Status201Created };
         }
 

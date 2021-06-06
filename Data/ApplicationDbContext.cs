@@ -30,7 +30,7 @@ namespace DotNetCoreSqlDb.Models
                 .Property(e => e.DayTimes)
                 .HasConversion(
                     v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<List<DateTime>>(v));
+                    v => JsonConvert.DeserializeObject<List<TimeSpan>>(v));
 
             modelBuilder
                 .Entity<Prescription>()
