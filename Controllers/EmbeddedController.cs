@@ -88,7 +88,7 @@ namespace RemindONServer.Controllers
         // POST: api/embedded/register
         [HttpPost("register")]
         [AllowAnonymous]
-        public async Task<ActionResult<RemindONDevice>> RegisterDevice([FromBody] RemindONDeviceViewModel deviceViewModel)
+        public async Task<ActionResult<RemindONDevice>> RegisterDevice([FromBody] RemindONDeviceRegisterViewModel deviceViewModel)
         {
             if (_context.RemindONDevices.FirstOrDefault(d => d.SerialNumber == deviceViewModel.SerialNumber) != null)
                 return StatusCode(StatusCodes.Status409Conflict);
