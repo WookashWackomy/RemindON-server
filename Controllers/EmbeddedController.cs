@@ -112,7 +112,7 @@ namespace RemindONServer.Controllers
                 DayTimes = new List<TimeSpan> { new TimeSpan(8, 0, 0), new TimeSpan(10, 0, 0), new TimeSpan(12, 0, 0) }
             };
 
-            _context.RemindONDevices.Add(model);
+            _context.Prescriptions.Add(prescription);
             await _context.SaveChangesAsync();
 
 
