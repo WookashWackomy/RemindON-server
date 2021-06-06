@@ -5,8 +5,11 @@ using System.Threading.Tasks;
 
 namespace RemindONServer.Models
 {
-    public class RegistrationDeviceViewModel
+    public class RemindONDeviceViewModel
     {
         public string SerialNumber { get; set; }
+        public string UserId { get; set; }
+        public DateTime LastSeen { get; set; }
+        public string Description { get; set; }
     }
 }

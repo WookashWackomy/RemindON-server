@@ -8,6 +8,7 @@ namespace RemindONServer.Models
 {
     public class CheckViewModel
     {
+        public int ID { get; set; }
         public int PrescriptionID { get; set; }
         public bool Flag { get; set; }
         public DateTime TimeStamp { get; set; }

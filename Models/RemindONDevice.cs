@@ -8,12 +8,13 @@ namespace RemindONServer.Models
     {
         [Key]
         public string SerialNumber { get; set; }
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
 
         [Display(Name = "Last seen")]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime LastSeen { get; set; }
         public string Password { get; set; }
+        public string? Description { get; set; }
     }
 }

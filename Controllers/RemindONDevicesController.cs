@@ -30,15 +30,20 @@ namespace RemindONServer.Controllers
 
         // GET: api/devices
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RemindONDevice>>> Getdevices()
+        public async Task<ActionResult<IEnumerable<RemindONDeviceViewModel>>> Getdevices()
         {
            var currentUser = await _userManager.GetUserAsync(HttpContext.User);
-           return await _context.RemindONDevices.Where(device => device.UserId == currentUser.Id).ToListAsync();
+           return await _context.RemindONDevices.Where(device => device.UserId == currentUser.Id).Select(d => new RemindONDeviceViewModel
+           {
+               SerialNumber = d.SerialNumber,
+               UserId = d.UserId,
+               Description = d.Description
+           }).ToListAsync();
         }
 
         // GET: api/devices/5
         [HttpGet("{serialNumber}")]
-        public async Task<ActionResult<RemindONDevice>> GetRemindONDevice(string serialNumber)
+        public async Task<ActionResult<RemindONDeviceViewModel>> GetRemindONDevice(string serialNumber)
         {
             var remindONDevice = await _context.RemindONDevices.FindAsync(serialNumber);
 
@@ -47,23 +52,31 @@ namespace RemindONServer.Controllers
                 return NotFound();
             }
 
-            return remindONDevice;
+            return new RemindONDeviceViewModel
+            {
+                SerialNumber = remindONDevice.SerialNumber,
+                UserId = remindONDevice.UserId,
+                Description = remindONDevice.Description
+            };
         }
 
         // PUT: api/devices/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkserialNumber=2123754
         [HttpPut("{serialNumber}")]
-        public async Task<IActionResult> PutRemindONDevice(string serialNumber, RemindONDevice remindONDevice)
+        public async Task<IActionResult> PutRemindONDevice(string serialNumber, RemindONDeviceViewModel remindONDeviceViewModel)
         {
-            if (serialNumber != remindONDevice.SerialNumber)
+            if (serialNumber != remindONDeviceViewModel.SerialNumber)
             {
                 return BadRequest();
             }
+            var dbDevice = await _context.RemindONDevices.FindAsync(serialNumber);
 
-            _context.Entry(remindONDevice).State = EntityState.Modified;
+            _context.Entry(remindONDeviceViewModel).State = EntityState.Modified;
 
             try
             {
+                dbDevice.SerialNumber = remindONDeviceViewModel.SerialNumber;
+                dbDevice.UserId = remindONDeviceViewModel.UserId;
+                dbDevice.Description = remindONDeviceViewModel.Description;
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -83,9 +96,18 @@ namespace RemindONServer.Controllers
 
         // POST: api/devices
         [HttpPost]
-        public async Task<ActionResult<RemindONDevice>> PostRemindONDevice(RemindONDevice remindONDevice)
+        public async Task<ActionResult<RemindONDevice>> PostRemindONDevice(RemindONDeviceViewModel remindONDevice)
         {
-            _context.RemindONDevices.Add(remindONDevice);
+            var currentUser = await _userManager.GetUserAsync(HttpContext.User);
+
+
+
+            var dbDevice = await _context.RemindONDevices.FindAsync(remindONDevice.SerialNumber);
+            if (dbDevice == null)
+                return NotFound();
+            dbDevice.UserId = currentUser.Id;
+            dbDevice.Description = remindONDevice.Description;
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetRemindONDevice", new { serialNumber = remindONDevice.SerialNumber }, remindONDevice);
@@ -100,8 +122,8 @@ namespace RemindONServer.Controllers
             {
                 return NotFound();
             }
-
-            _context.RemindONDevices.Remove(remindONDevice);
+            remindONDevice.UserId = null;
+            remindONDevice.Description = null;
             await _context.SaveChangesAsync();
 
             return NoContent();

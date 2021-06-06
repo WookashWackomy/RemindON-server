@@ -43,7 +43,7 @@ namespace RemindONServer.Controllers
 
         // PUT: api/user
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut]
+        [HttpPut("info")]
         public async Task<IActionResult> PutUser([FromBody] RegisterViewModel userModel)
         {
             if (!ModelState.IsValid)
