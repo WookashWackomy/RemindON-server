@@ -100,7 +100,6 @@ namespace RemindONServer.Controllers
             };
 
             _context.RemindONDevices.Add(model);
-            await _context.SaveChangesAsync();
 
             //temp code
             var prescription = new Prescription
@@ -113,8 +112,9 @@ namespace RemindONServer.Controllers
             };
 
             _context.Prescriptions.Add(prescription);
-            await _context.SaveChangesAsync();
+            //end of temp code
 
+            await _context.SaveChangesAsync();
 
 
             return new ObjectResult(model.Password) { StatusCode = StatusCodes.Status201Created };
