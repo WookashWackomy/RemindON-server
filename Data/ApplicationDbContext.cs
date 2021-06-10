@@ -17,11 +17,10 @@ namespace DotNetCoreSqlDb.Models
         {
         }
 
-        public DbSet<RemindONServer.Models.RemindONDevice> RemindONDevices { get; set; }
-        public DbSet<RemindONServer.Models.User> User { get; set; }
-        public DbSet<RemindONServer.Models.Prescription> Prescriptions { get; set; }
-        public DbSet<RemindONServer.Models.Check> Checks { get; set; }
-        public DbSet<DotNetCoreSqlDb.Models.Todo> Todo { get; set; }
+        public DbSet<RemindONDevice> RemindONDevices { get; set; }
+        public DbSet<User> User { get; set; }
+        public DbSet<Prescription> Prescriptions { get; set; }
+        public DbSet<Check> Checks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

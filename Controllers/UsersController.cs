@@ -136,6 +136,7 @@ namespace RemindONServer.Controllers
             {
                 new Claim(ClaimTypes.Email, identityUser.Email),
                 new Claim(ClaimTypes.Name, identityUser.UserName),
+                new Claim(ClaimTypes.NameIdentifier, identityUser.Id.ToString()),
                 new Claim (ClaimTypes.Role, Roles.StandardUser)
             };
 

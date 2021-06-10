@@ -14,6 +14,8 @@ using RemindONServer.Models;
 using RemindONServer.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.OpenApi.Models;
 
 namespace DotNetCoreSqlDb
 {
@@ -26,9 +28,31 @@ namespace DotNetCoreSqlDb
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v0.1", new OpenApiInfo
+                {
+                    Version = "v0.1",
+                    Title = "RemindON API",
+                    Description = "RemindON Web API",
+                    TermsOfService = new Uri("https://remindonserverprod.azurewebsites.net/tos"),
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Łukasz Łakomy",
+                        Email = "wookie.xp.07@gmail.com",
+                        Url = new Uri("https://www.github.com/wookashwackomy"),
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "License",
+                        Url = new Uri("https://example.com/license"), //TODO
+                    }
+                });
+            });
+
             services.AddControllersWithViews();
             services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("DB_MAIN")));
@@ -83,24 +107,39 @@ namespace DotNetCoreSqlDb
 
                     config.AddPolicy("BasicAuthentication", new AuthorizationPolicyBuilder("BasicAuthentication").RequireAuthenticatedUser().Build());
                 });
+
+
+            services.AddScoped<IAuthorizationHandler, ShouldBeAnUserRequirementHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 //app.UseHsts();
             }
 
             //app.UseHttpsRedirection();
+            app.UseDefaultFiles();
             app.UseStaticFiles();
+
+            app.UseSwagger(c =>
+            {
+                c.RouteTemplate = "/swagger/{documentName}/swagger.json";
+            });
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v0.1/swagger.json", "RemindON API V0.1");
+            });
 
             app.UseRouting();
 

@@ -6,23 +6,24 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using DotNetCoreSqlDb.Models;
 
-namespace DotNetCoreSqlDb.Controllers
+namespace DotNetCoreSqlDb.Controllers 
 {
     [Route("")]
     public class HomeController : Controller
     {
+        [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
 
-        [Route("privacy")]
-        public IActionResult Privacy()
+        [HttpGet("tos")]
+        public IActionResult TermsOfService()
         {
             return View();
         }
 
-        [Route("error")]
+        [HttpGet("error")]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
