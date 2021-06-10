@@ -7,14 +7,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using DotNetCoreSqlDb.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using RemindONServer.Controllers.Utils;
 using RemindONServer.Models;
 using RemindONServer.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
 using Microsoft.OpenApi.Models;
 
 namespace DotNetCoreSqlDb
@@ -30,28 +28,6 @@ namespace DotNetCoreSqlDb
 
         public void ConfigureServices(IServiceCollection services)
         {
-
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v0.1", new OpenApiInfo
-                {
-                    Version = "v0.1",
-                    Title = "RemindON API",
-                    Description = "RemindON Web API",
-                    TermsOfService = new Uri("https://remindonserverprod.azurewebsites.net/tos"),
-                    Contact = new OpenApiContact
-                    {
-                        Name = "Łukasz Łakomy",
-                        Email = "wookie.xp.07@gmail.com",
-                        Url = new Uri("https://www.github.com/wookashwackomy"),
-                    },
-                    License = new OpenApiLicense
-                    {
-                        Name = "License",
-                        Url = new Uri("https://example.com/license"), //TODO
-                    }
-                });
-            });
 
             services.AddControllersWithViews();
             services.AddDbContext<ApplicationDbContext>(options =>
@@ -110,12 +86,34 @@ namespace DotNetCoreSqlDb
 
 
             services.AddScoped<IAuthorizationHandler, ShouldBeAnUserRequirementHandler>();
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v0.1", new OpenApiInfo
+                {
+                    Version = "v0.1",
+                    Title = "RemindON API",
+                    Description = "RemindON Web API",
+                    TermsOfService = new Uri("https://remindonserverprod.azurewebsites.net/tos"),
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Łukasz Łakomy",
+                        Email = "wookie.xp.07@gmail.com",
+                        Url = new Uri("https://www.github.com/wookashwackomy"),
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "License",
+                        Url = new Uri("https://example.com/license"), //TODO
+                    }
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -123,23 +121,11 @@ namespace DotNetCoreSqlDb
             else
             {
                 app.UseExceptionHandler("/error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                //app.UseHsts();
+                app.UseHsts();
             }
 
-            //app.UseHttpsRedirection();
-            app.UseDefaultFiles();
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
-
-            app.UseSwagger(c =>
-            {
-                c.RouteTemplate = "/swagger/{documentName}/swagger.json";
-            });
-
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v0.1/swagger.json", "RemindON API V0.1");
-            });
 
             app.UseRouting();
 
@@ -149,6 +135,18 @@ namespace DotNetCoreSqlDb
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+            });
+
+
+
+            app.UseSwagger(c =>
+            {
+                c.RouteTemplate = "/swagger/{documentName}/swagger.json";
+            });
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v0.1/swagger.json", "RemindON API V0.1");
             });
         }
     }
