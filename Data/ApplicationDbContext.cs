@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using RemindONServer.Enums;
-using RemindONServer.Models;
 
-namespace DotNetCoreSqlDb.Models
+namespace RemindONServer.Models
 {
     public class ApplicationDbContext : IdentityDbContext<User>
     {

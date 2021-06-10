@@ -1,6 +1,6 @@
 using System;
 
-namespace DotNetCoreSqlDb.Models
+namespace RemindONServer.Models
 {
     public class ErrorViewModel
     {

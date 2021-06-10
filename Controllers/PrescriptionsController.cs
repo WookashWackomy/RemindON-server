@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using DotNetCoreSqlDb.Models;
 using RemindONServer.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -37,7 +36,7 @@ namespace RemindONServer.Controllers
                     text1 = p.text1,
                     text2 = p.text2,
                     WeekDays = p.WeekDays,
-                    DayTimes = p.DayTimes
+                    DayTimes = p.DayTimes.Select(ts => ts.ToString())
                 }).AsEnumerable());
             }
 
@@ -46,7 +45,7 @@ namespace RemindONServer.Controllers
                 text1 = p.text1,
                 text2 = p.text2,
                 WeekDays = p.WeekDays,
-                DayTimes = p.DayTimes
+                DayTimes = p.DayTimes.Select(ts => ts.ToString())
             }).AsEnumerable());
         }
 
@@ -63,7 +62,7 @@ namespace RemindONServer.Controllers
                 text1 = prescription.text1,
                 text2 = prescription.text2,
                 WeekDays = prescription.WeekDays,
-                DayTimes = prescription.DayTimes
+                DayTimes = prescription.DayTimes.Select(ts => ts.ToString())
             });
         }
 
@@ -129,7 +128,7 @@ namespace RemindONServer.Controllers
                 text1 = prescription.text1,
                 text2 = prescription.text2,
                 WeekDays = prescription.WeekDays,
-                DayTimes = prescription.DayTimes
+                DayTimes = prescription.DayTimes.Select(ts => TimeSpan.Parse(ts)).ToList()
             });
             await _context.SaveChangesAsync();
 

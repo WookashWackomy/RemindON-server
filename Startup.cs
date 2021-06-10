@@ -6,16 +6,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
-using DotNetCoreSqlDb.Models;
+using RemindONServer.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using RemindONServer.Controllers.Utils;
-using RemindONServer.Models;
 using RemindONServer.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
+using RemindONServer.Middlewares;
 
-namespace DotNetCoreSqlDb
+namespace RemindONServer
 {
     public class Startup
     {
@@ -116,7 +116,9 @@ namespace DotNetCoreSqlDb
 
             if (env.IsDevelopment())
             {
+                app.UseMiddleware<RequestDiagnosticsMiddleware>();
                 app.UseDeveloperExceptionPage();
+                app.UseRouteDebugger();
             }
             else
             {

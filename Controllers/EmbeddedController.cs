@@ -1,7 +1,5 @@
-﻿using DotNetCoreSqlDb.Models;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using RemindONServer.Auth;
 using RemindONServer.Models;
@@ -50,7 +48,7 @@ namespace RemindONServer.Controllers
                     text1 = p.text1,
                     text2 = p.text2,
                     WeekDays = p.WeekDays,
-                    DayTimes = p.DayTimes
+                    DayTimes = p.DayTimes.Select(p => p.ToString())
                 }).AsEnumerable();
 
             return Ok(prescriptions);
