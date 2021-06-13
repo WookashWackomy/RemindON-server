@@ -35,29 +35,39 @@ namespace RemindONServer.Controllers
 
         // GET api/embedded/prescriptions
         [HttpGet("prescriptions")]
-        public async Task<ActionResult<IEnumerable<PrescriptionViewModel>>> GetPrescriptionsForDevice([FromRoute] string serialNumber)
+        public async Task<ActionResult<IEnumerable<PrescriptionViewModel>>> GetPrescriptionsForDevice()
         {
+            var authHeader = Request.Headers["Authorization"].ToString();
+            var credentials = authHeader.Split(new[] { ':' }, 2);
+            var serialNumber = credentials[0];
+
             var device = _context.RemindONDevices.FirstOrDefault(d => d.SerialNumber == serialNumber);
             if (device == null)
             {
                 return BadRequest("Device of given serial number not found");
             }
+
             var prescriptions = _context.Prescriptions.Where(p => p.DeviceSerialNumber == serialNumber)
+                .AsEnumerable() // TODO evaluate at the end of query
                 .Select(p => new PrescriptionViewModel
                 {
                     text1 = p.text1,
                     text2 = p.text2,
                     WeekDays = p.WeekDays,
-                    DayTimes = p.DayTimes.Select(p => p.ToString())
-                }).AsEnumerable();
+                    DayTimes = p.DayTimes.Select(dt => dt.ToString())
+                });
 
             return Ok(prescriptions);
         }
 
         // POST api/embedded/devices/{serialNumber}/prescriptions/{id}/checks
         [HttpPost("prescriptions/{id}/checks")]
-        public async Task<IActionResult> PostPrescriptionCheck([FromRoute] string serialNumber, [FromRoute] int id, [FromBody] CheckViewModel checkViewModel)
+        public async Task<IActionResult> PostPrescriptionCheck( [FromRoute] int id, [FromBody] CheckViewModel checkViewModel)
         {
+            var authHeader = Request.Headers["Authorization"].ToString(); // TODO wydzielić
+            var credentials = authHeader.Split(new[] { ':' }, 2);
+            var serialNumber = credentials[0];
+
             var device = _context.RemindONDevices.FirstOrDefault(d => d.SerialNumber == serialNumber);
             if (device == null)
             {

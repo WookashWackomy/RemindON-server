@@ -84,6 +84,7 @@ namespace RemindONServer
                     config.AddPolicy("BasicAuthentication", new AuthorizationPolicyBuilder("BasicAuthentication").RequireAuthenticatedUser().Build());
                 });
 
+            services.AddCors();
 
             services.AddScoped<IAuthorizationHandler, ShouldBeAnUserRequirementHandler>();
 
@@ -126,6 +127,11 @@ namespace RemindONServer
                 app.UseHsts();
             }
 
+            app.UseCors(builder => builder //TODO per site? is it safe enough?
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                );
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -134,10 +140,12 @@ namespace RemindONServer
             app.UseAuthentication();
             app.UseAuthorization();
 
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
 
 
 

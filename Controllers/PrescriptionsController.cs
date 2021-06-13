@@ -31,22 +31,26 @@ namespace RemindONServer.Controllers
         {
             if (Enum.TryParse<DayOfWeek>(date, out var dayOfWeek))
             {
-                return Ok(_context.Prescriptions.Where(p => p.DeviceSerialNumber == serialNumber && p.WeekDays.Contains(dayOfWeek)).Select(p => new PrescriptionViewModel
+                return Ok(_context.Prescriptions.Where(p => p.DeviceSerialNumber == serialNumber && p.WeekDays.Contains(dayOfWeek))
+                .AsEnumerable()
+                .Select(p => new PrescriptionViewModel
                 {
                     text1 = p.text1,
                     text2 = p.text2,
                     WeekDays = p.WeekDays,
                     DayTimes = p.DayTimes.Select(ts => ts.ToString())
-                }).AsEnumerable());
+                }));
             }
 
-            return Ok(_context.Prescriptions.Where(p => p.DeviceSerialNumber == serialNumber).Select(p => new PrescriptionViewModel
+            return Ok(_context.Prescriptions.Where(p => p.DeviceSerialNumber == serialNumber)
+                .AsEnumerable()
+                .Select(p => new PrescriptionViewModel
             {
                 text1 = p.text1,
                 text2 = p.text2,
                 WeekDays = p.WeekDays,
                 DayTimes = p.DayTimes.Select(ts => ts.ToString())
-            }).AsEnumerable());
+            }));
         }
 
         // GET: api/devices/{serialNumber}/prescriptions/{id}
