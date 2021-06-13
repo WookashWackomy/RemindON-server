@@ -19,6 +19,8 @@ namespace RemindONServer
 {
     public class Startup
     {
+        readonly string AllowSpecificOriginsPolicy = "_AllowSpecificOriginsPolicy";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -84,7 +86,12 @@ namespace RemindONServer
                     config.AddPolicy("BasicAuthentication", new AuthorizationPolicyBuilder("BasicAuthentication").RequireAuthenticatedUser().Build());
                 });
 
-            services.AddCors();
+            services.AddCors(o => o.AddPolicy(AllowSpecificOriginsPolicy,
+                      builder =>
+                        builder.WithOrigins("http://localhost:3000", "https://localhost:3000")
+                      .AllowAnyMethod()
+                       .AllowAnyHeader()
+                      ));
 
             services.AddScoped<IAuthorizationHandler, ShouldBeAnUserRequirementHandler>();
 
@@ -127,16 +134,12 @@ namespace RemindONServer
                 app.UseHsts();
             }
 
-            app.UseCors(builder => builder //TODO safety
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowAnyOrigin()
-                );
-
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseCors(AllowSpecificOriginsPolicy);
 
             app.UseAuthentication();
             app.UseAuthorization();
