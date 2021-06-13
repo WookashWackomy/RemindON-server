@@ -75,7 +75,7 @@ namespace RemindONServer.Controllers
 
             var newCheck = new Check
             {
-                Flag = checkViewModel.Flag,
+                Flag = Convert.ToBoolean(checkViewModel.Flag),
                 TimeStamp = DateTime.Parse(checkViewModel.TimeStamp),
                 PrescriptionID = checkViewModel.PrescriptionID
             };
@@ -100,7 +100,7 @@ namespace RemindONServer.Controllers
             var checks = _context.Checks.Where(p => p.PrescriptionID == prescriptionId)
                         .Select(p => new CheckViewModel
                         { ID = p.ID,
-                            Flag = p.Flag,
+                            Flag = Convert.ToInt32(p.Flag),
                             TimeStamp = GetFormattedDate(p.TimeStamp)
                         }).AsEnumerable();
 

@@ -112,7 +112,7 @@ namespace RemindONServer.Controllers
             {
                 ID = c.ID,
                 PrescriptionID = c.PrescriptionID,
-                Flag = c.Flag
+                Flag = Convert.ToInt32(c.Flag)
             }).AsEnumerable());
         }        
 

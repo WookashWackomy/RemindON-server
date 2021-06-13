@@ -127,9 +127,10 @@ namespace RemindONServer
                 app.UseHsts();
             }
 
-            app.UseCors(builder => builder //TODO per site? is it safe enough?
+            app.UseCors(builder => builder //TODO safety
                 .AllowAnyHeader()
                 .AllowAnyMethod()
+                .AllowAnyOrigin()
                 );
 
             app.UseHttpsRedirection();
