@@ -11,5 +11,6 @@ namespace RemindONServer.Models
         public string text2 { get; set; }
         public List<DayOfWeek> WeekDays { get; set; }
         public IEnumerable<string> DayTimes { get; set; }
+        public int ID { get; internal set; }
     }
 }

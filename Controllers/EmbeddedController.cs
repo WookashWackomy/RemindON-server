@@ -51,6 +51,7 @@ namespace RemindONServer.Controllers
                 .AsEnumerable() // TODO evaluate at the end of query
                 .Select(p => new PrescriptionViewModel
                 {
+                    ID = p.ID,
                     text1 = p.text1,
                     text2 = p.text2,
                     WeekDays = p.WeekDays,
@@ -60,9 +61,9 @@ namespace RemindONServer.Controllers
             return Ok(prescriptions);
         }
 
-        // POST api/embedded/devices/{serialNumber}/prescriptions/{id}/checks
-        [HttpPost("prescriptions/{id}/checks")]
-        public async Task<IActionResult> PostPrescriptionCheck( [FromRoute] int id, [FromBody] CheckViewModel checkViewModel)
+        // POST api/embedded/checks
+        [HttpPost("checks")]
+        public async Task<IActionResult> PostPrescriptionCheck( [FromBody] CheckViewModel checkViewModel)
         {
             var authHeader = Request.Headers["Authorization"].ToString(); // TODO wydzielić
             var credentials = authHeader.Split(new[] { ':' }, 2);
@@ -74,7 +75,7 @@ namespace RemindONServer.Controllers
                 return BadRequest("Device of given serial number not found");
             }
 
-            var prescription = _context.Prescriptions.FirstOrDefault(p => p.ID == id);
+            var prescription = _context.Prescriptions.FirstOrDefault(p => p.ID == checkViewModel.PrescriptionID);
             if (prescription == null)
             {
                 return BadRequest("Prescrption of given id not found");
@@ -84,7 +85,7 @@ namespace RemindONServer.Controllers
             {
                 Flag = checkViewModel.Flag,
                 TimeStamp = checkViewModel.TimeStamp,
-                PrescriptionID = id
+                PrescriptionID = checkViewModel.PrescriptionID
             };
 
             _context.Checks.Add(newCheck);
