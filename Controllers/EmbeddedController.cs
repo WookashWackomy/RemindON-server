@@ -24,42 +24,34 @@ namespace RemindONServer.Controllers
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        private static string GetFormattedDate(DateTime dateTime) => $"{dateTime:yyyy-MM-dd HH:mm:ss} {(int)dateTime.DayOfWeek}";
-
 
         // GET api/embedded/time
         [HttpGet("time")]
         public ActionResult<string> GetTime()
         {
-            return GetFormattedDate(DateTime.Now);
+            return EmbeddedTimeStampHelper.GetFormattedDateReduced(DateTime.Now);
         }
 
         // GET api/embedded/prescriptions
         [HttpGet("prescriptions")]
-        public async Task<ActionResult<IEnumerable<PrescriptionViewModel>>> GetPrescriptionsForDevice()
+        public async Task<ActionResult<IEnumerable<EmbeddedPrescriptionViewModel>>> GetPrescriptionsForDevice()
         {
             var authHeader = Request.Headers["Authorization"].ToString();
             var credentials = authHeader.Split(new[] { ':' }, 2);
             var serialNumber = credentials[0];
 
-            var device = _context.RemindONDevices.FirstOrDefault(d => d.SerialNumber == serialNumber);
-            if (device == null)
-            {
-                return BadRequest("Device of given serial number not found");
-            }
-
             var prescriptions = _context.Prescriptions.Where(p => p.DeviceSerialNumber == serialNumber)
                 .AsEnumerable() // TODO evaluate at the end of query
-                .Select(p => new PrescriptionViewModel
+                .Select(p => new EmbeddedPrescriptionViewModel
                 {
                     ID = p.ID,
                     text1 = p.text1,
                     text2 = p.text2,
                     WeekDays = p.WeekDays,
-                    DayTimes = p.DayTimes.Select(dt => dt.ToString())
+                    DayTimes = p.DayTimes.Select(dt => ((int)dt.TotalSeconds).ToString())
                 });
 
-            return Ok(prescriptions);
+            return Ok($"[{string.Join(';',prescriptions)}]");
         }
 
         // POST api/embedded/checks
@@ -86,9 +78,14 @@ namespace RemindONServer.Controllers
             return new ObjectResult(newCheck) { StatusCode = StatusCodes.Status201Created };
         }
 
+        //<summary>Get checks for prescription </summary> 
+        //<param name="prescriptionId"> prescription ID </param>
+        //<returns> String of an array of checks: ["{ID},{PrescriptionID},{Flag},{TimeStamp}",...,"{ID},{PrescriptionID},{Flag},{TimeStamp}"] <returns/>
         // GET api/embedded/checks?prescriptionId=124
         [HttpGet("checks")]
-        public async Task<ActionResult<IEnumerable<CheckViewModel>>> GetChecks([FromQuery]int prescriptionId)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<IEnumerable<EmbeddedCheckViewModel>>> GetChecks([FromQuery]int prescriptionId)
         {
 
             var prescription = _context.Prescriptions.FirstOrDefault(p => p.ID == prescriptionId);
@@ -98,13 +95,14 @@ namespace RemindONServer.Controllers
             }
 
             var checks = _context.Checks.Where(p => p.PrescriptionID == prescriptionId)
-                        .Select(p => new CheckViewModel
-                        { ID = p.ID,
+                        .Select(p => new EmbeddedCheckViewModel
+                        {   ID = p.ID,
                             Flag = Convert.ToInt32(p.Flag),
-                            TimeStamp = GetFormattedDate(p.TimeStamp)
+                            PrescriptionID = p.PrescriptionID,
+                            TimeStamp = EmbeddedTimeStampHelper.GetFormattedDateReduced(p.TimeStamp)
                         }).AsEnumerable();
 
-            return Ok(checks);
+            return Ok($"[{string.Join(';',checks)}]");
         }
 
         // POST: api/embedded/register

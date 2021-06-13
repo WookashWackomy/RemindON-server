@@ -113,7 +113,7 @@ namespace RemindONServer.Controllers
                 ID = c.ID,
                 PrescriptionID = c.PrescriptionID,
                 Flag = Convert.ToInt32(c.Flag)
-            }).AsEnumerable());
+            }));
         }        
 
         //POST: api/devices/{serialNumber}/prescriptions
