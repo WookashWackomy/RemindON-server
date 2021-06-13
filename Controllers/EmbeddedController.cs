@@ -24,13 +24,14 @@ namespace RemindONServer.Controllers
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
+        private static string GetFormattedDate(DateTime dateTime) => $"{dateTime:yyyy-MM-dd HH:mm:ss} {(int)dateTime.DayOfWeek}";
+
 
         // GET api/embedded/time
         [HttpGet("time")]
         public ActionResult<string> GetTime()
         {
-            var currentDate = DateTime.Now;
-            return $"{currentDate:yyyy-MM-dd HH:mm:ss} {(int)currentDate.DayOfWeek}";
+            return GetFormattedDate(DateTime.Now);
         }
 
         // GET api/embedded/prescriptions
@@ -65,15 +66,6 @@ namespace RemindONServer.Controllers
         [HttpPost("checks")]
         public async Task<IActionResult> PostPrescriptionCheck( [FromBody] CheckViewModel checkViewModel)
         {
-            var authHeader = Request.Headers["Authorization"].ToString(); // TODO wydzielić
-            var credentials = authHeader.Split(new[] { ':' }, 2);
-            var serialNumber = credentials[0];
-
-            var device = _context.RemindONDevices.FirstOrDefault(d => d.SerialNumber == serialNumber);
-            if (device == null)
-            {
-                return BadRequest("Device of given serial number not found");
-            }
 
             var prescription = _context.Prescriptions.FirstOrDefault(p => p.ID == checkViewModel.PrescriptionID);
             if (prescription == null)
@@ -84,7 +76,7 @@ namespace RemindONServer.Controllers
             var newCheck = new Check
             {
                 Flag = checkViewModel.Flag,
-                TimeStamp = checkViewModel.TimeStamp,
+                TimeStamp = DateTime.Parse(checkViewModel.TimeStamp),
                 PrescriptionID = checkViewModel.PrescriptionID
             };
 
@@ -92,6 +84,27 @@ namespace RemindONServer.Controllers
             await _context.SaveChangesAsync();
 
             return new ObjectResult(newCheck) { StatusCode = StatusCodes.Status201Created };
+        }
+
+        // GET api/embedded/checks?prescriptionId=124
+        [HttpGet("checks")]
+        public async Task<ActionResult<IEnumerable<CheckViewModel>>> GetChecks([FromQuery]int prescriptionId)
+        {
+
+            var prescription = _context.Prescriptions.FirstOrDefault(p => p.ID == prescriptionId);
+            if (prescription == null)
+            {
+                return BadRequest("Prescrption of given id not found");
+            }
+
+            var checks = _context.Checks.Where(p => p.PrescriptionID == prescriptionId)
+                        .Select(p => new CheckViewModel
+                        { ID = p.ID,
+                            Flag = p.Flag,
+                            TimeStamp = GetFormattedDate(p.TimeStamp)
+                        }).AsEnumerable();
+
+            return Ok(checks);
         }
 
         // POST: api/embedded/register
