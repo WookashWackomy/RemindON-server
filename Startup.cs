@@ -65,6 +65,7 @@ namespace RemindONServer
             .AddCookie(options =>
             {
                 options.Cookie.SameSite = SameSiteMode.None;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
                 options.Cookie.Name = "AuthCookie";
                 options.Events.OnRedirectToAccessDenied = ResponseHelpers.UnAuthorizedResponse;
                 options.Events.OnRedirectToLogin = ResponseHelpers.UnAuthorizedResponse;
@@ -134,6 +135,14 @@ namespace RemindONServer
                 app.UseExceptionHandler("/error");
                 app.UseHsts();
             }
+
+            var cookiePolicyOptions = new CookiePolicyOptions
+            {
+                Secure = CookieSecurePolicy.SameAsRequest,
+                MinimumSameSitePolicy = SameSiteMode.None
+            };
+
+            app.UseCookiePolicy(cookiePolicyOptions);
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
