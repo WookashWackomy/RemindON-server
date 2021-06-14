@@ -70,7 +70,7 @@ namespace RemindONServer
                 options.Events.OnRedirectToAccessDenied = ResponseHelpers.UnAuthorizedResponse;
                 options.Events.OnRedirectToLogin = ResponseHelpers.UnAuthorizedResponse;
                 options.SlidingExpiration = true;
-                options.ExpireTimeSpan = new TimeSpan(0, 1, 0);
+                options.ExpireTimeSpan = new TimeSpan(1, 0, 0);
             })
             .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", options => { });
 
