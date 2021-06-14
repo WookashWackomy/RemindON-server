@@ -91,6 +91,7 @@ namespace RemindONServer
                         builder.WithOrigins("http://localhost:3000", "https://localhost:3000", "https://dev01-remindon.netlify.app/", "http://dev01-remindon.netlify.app/")
                       .AllowAnyMethod()
                        .AllowAnyHeader()
+                       .AllowCredentials()
                       ));
 
             services.AddScoped<IAuthorizationHandler, ShouldBeAnUserRequirementHandler>();
