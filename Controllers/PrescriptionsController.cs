@@ -115,6 +115,7 @@ namespace RemindONServer.Controllers
 
             return StatusCode(StatusCodes.Status200OK);
         }
+
         /// <summary>
         /// Deletes a prescription
         /// </summary>
