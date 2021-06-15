@@ -5,24 +5,28 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using RemindONServer.Models;
+using RemindONServer.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
+using RemindONServer.Domain.Services;
+using RemindONServer.Domain.Persistence.Contexts;
 
 namespace RemindONServer.Controllers
 {
-    [Route("api/devices/{serialNumber}/prescriptions")]
+    [Route("api/devices/{serialNumber}/prescriptions")] //TODO switch to api/prescriptions with query params
     [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     [Authorize("ShouldBeAnUser")]
     [ApiController]
     public class PrescriptionsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context; //TODO encapsulate
+        private readonly IPrescriptionsService _prescriptionsService;
 
-        public PrescriptionsController(ApplicationDbContext context)
+        public PrescriptionsController(ApplicationDbContext context, IPrescriptionsService prescriptionsService)
         {
             _context = context;
+            _prescriptionsService = prescriptionsService ?? throw new ArgumentNullException(nameof(prescriptionsService));
         }
 
         // GET: api/devices/{serialNumber}/prescriptions?date=2021-09-10
@@ -129,6 +133,7 @@ namespace RemindONServer.Controllers
 
             await _context.Prescriptions.AddAsync(new Prescription
             {
+                DeviceSerialNumber = serialNumber,
                 text1 = prescription.text1,
                 text2 = prescription.text2,
                 WeekDays = prescription.WeekDays,

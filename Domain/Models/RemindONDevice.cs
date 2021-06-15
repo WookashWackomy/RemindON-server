@@ -2,7 +2,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace RemindONServer.Models
+namespace RemindONServer.Domain.Models
 {
     public class RemindONDevice
     {

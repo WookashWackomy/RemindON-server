@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RemindONServer.Models;
+using RemindONServer.Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Authorization;
@@ -13,9 +13,12 @@ using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using RemindONServer.Auth;
+using RemindONServer.Domain.Persistence.Contexts;
+using RemindONServer.Extensions;
 
 namespace RemindONServer.Controllers
 {
+    [Produces("application/json")]
     [Route("api/user")]
     [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     [Authorize("ShouldBeAnUser")]
@@ -78,24 +81,36 @@ namespace RemindONServer.Controllers
             return NoContent();
         }
 
-        // POST: api/user
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
+        /// <summary>
+        /// Registers user
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /api/user/register
+        ///     {
+        ////        "firstName": "John",
+        ////        "secondName": "Malkovich", 
+        ////        "email": "rurasura@dsa.com",
+        ////        "password": "myLi3ttlePony1@34"
+        ///     }
+        /// </remarks>
+        /// <returns> status message</returns>
         [HttpPost("register")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [AllowAnonymous]
-        public async Task<ActionResult<User>> PostUser([FromBody] RegisterViewModel registerModel)
+        public async Task<ActionResult<User>> RegisterUser([FromBody] RegisterViewModel registerModel)
         {
-            //_context.User.Add(user);
-            //await _context.SaveChangesAsync();
-
-            //return CreatedAtAction("GetUser", new { id = user.Id }, user);
-
             if (!ModelState.IsValid || registerModel == null)
             {
-                return new BadRequestObjectResult(new { Message = "User Registration Failed" });
+                return new BadRequestObjectResult(new { Message = "User Registration Failed", Errors = ModelState.GetErrorMessages() });
             }
 
             var identityUser = new User { UserName = registerModel.Email, FirstName = registerModel.FirstName, LastName = registerModel.SecondName, Email = registerModel.Email };
             var result = await _userManager.CreateAsync(identityUser, registerModel.Password);
+
             if (!result.Succeeded)
             {
                 var dictionary = new ModelStateDictionary();
@@ -107,7 +122,7 @@ namespace RemindONServer.Controllers
                 return new BadRequestObjectResult(new { Message = "User Registration Failed", Errors = dictionary });
             }
 
-            return Ok(new { Message = "User Reigstration Successful" });
+            return NoContent();
         }
 
         [HttpPost("login")]

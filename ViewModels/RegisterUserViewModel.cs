@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace RemindONServer.Models
+namespace RemindONServer.Domain.Models
 {
     public class RegisterViewModel
     {

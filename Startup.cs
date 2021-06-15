@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
-using RemindONServer.Models;
+using RemindONServer.Domain.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using RemindONServer.Controllers.Utils;
 using RemindONServer.Auth;
@@ -14,6 +14,12 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
 using RemindONServer.Middlewares;
+using System.Reflection;
+using System.IO;
+using RemindONServer.Domain.Repositories;
+using RemindONServer.Domain.Services;
+using RemindONServer.Domain.Persistence.Contexts;
+using RemindONServer.Persistence.Repositories;
 
 namespace RemindONServer
 {
@@ -97,6 +103,9 @@ namespace RemindONServer
 
             services.AddScoped<IAuthorizationHandler, ShouldBeAnUserRequirementHandler>();
 
+            services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
+            services.AddScoped<IPrescriptionsService, PrescriptionService>();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v0.1", new OpenApiInfo
@@ -117,6 +126,10 @@ namespace RemindONServer
                         Url = new Uri("https://example.com/license"), //TODO
                     }
                 });
+
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
         }
 

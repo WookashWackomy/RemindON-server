@@ -1,6 +1,6 @@
 using System;
 
-namespace RemindONServer.Models
+namespace RemindONServer.Domain.Models
 {
     public class ErrorViewModel
     {

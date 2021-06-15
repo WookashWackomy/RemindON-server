@@ -5,9 +5,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace RemindONServer.Models
+namespace RemindONServer.Domain.Models
 {
-    public class User : IdentityUser
+    public class UserInfoViewModel
     {
         [Required]
         [PersonalData]
@@ -15,6 +15,9 @@ namespace RemindONServer.Models
 
         [Required]
         [PersonalData]
-        public string LastName { get; set; }
+        public string SecondName { get; set; }
+        [Required]
+        [PersonalData]
+        public string Email { get; set; }
     }
 }

@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using RemindONServer.Domain.Models;
 
-namespace RemindONServer.Models
+namespace RemindONServer.Domain.Persistence.Contexts
 {
     public class ApplicationDbContext : IdentityDbContext<User>
     {

@@ -2,7 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RemindONServer.Auth;
-using RemindONServer.Models;
+using RemindONServer.Domain.Models;
+using RemindONServer.Domain.Persistence.Contexts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
