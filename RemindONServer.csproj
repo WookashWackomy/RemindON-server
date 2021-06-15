@@ -14,6 +14,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>C:\Apps\Jaromin\3\RemindONServer\RemindONServer.xml</DocumentationFile>
   </PropertyGroup>
 
 

@@ -16,6 +16,7 @@ using RemindONServer.Domain.Services.Communication;
 
 namespace RemindONServer.Controllers
 {
+    [Produces("application/json")]
     [Route("api/devices/{serialNumber}/prescriptions")] //TODO switch to api/prescriptions with query params
     [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     [Authorize("ShouldBeAnUser")]
@@ -77,23 +78,54 @@ namespace RemindONServer.Controllers
                 DayTimes = prescription.DayTimes.Select(ts => ts.ToString())
             });
         }
-
-        // PUT: api/devices/{serialNumber}/prescriptions/{id}
+        /// <summary>
+        /// changes the data of a prescription
+        /// </summary>
+        /// <remarks>
+        ///  PUT: api/devices/125246234436424/prescriptions/{id}
+        ///  {
+        ///		"text1": "print pies2",
+        ///		"text2": "print php2",
+        ///		"weekDays": [
+        ///			2,
+        ///			3,
+        ///			6
+        ///		],
+        ///		"dayTimes": [
+        ///			"09:00:00",
+        ///			"11:00:00",
+        ///			"13:00:00"
+        ///		]
+        ///   }
+        /// </remarks>
+        /// <returns> status code with optional error message</returns>
         [HttpPut("{id}")]
-        public async Task<ActionResult<PrescriptionViewModel>> GetPrescription([FromRoute] string serialNumber, [FromRoute] int id, [FromBody] PrescriptionViewModel prescriptionViewModel) 
+        [ProducesResponseType(typeof(void),StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(void), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(void), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<PrescriptionViewModel>> ChangePrescription([FromRoute] string serialNumber, [FromRoute] int id, [FromBody] PrescriptionViewModel prescriptionViewModel)
         {
             if (!ModelState.IsValid)
                 return BadRequest("Not a valid model");
 
-            var repositoryResponse = await _prescriptionsService.UpdateAsync(id,PrescriptionModelMapper.MapFromViewModel(prescriptionViewModel));
+            var repositoryResponse = await _prescriptionsService.UpdateAsync(id, PrescriptionModelMapper.MapFromViewModel(prescriptionViewModel));
             if (repositoryResponse.RepositoryResponse == RepositoryResponse.NotFound) return NotFound();
             if (repositoryResponse.RepositoryResponse == RepositoryResponse.Error) return StatusCode(StatusCodes.Status500InternalServerError, repositoryResponse.Message);
 
             return StatusCode(StatusCodes.Status200OK);
         }
-
-        // DELETE: api/devices/{serialNumber}/prescriptions/{id}
+        /// <summary>
+        /// Deletes a prescription
+        /// </summary>
+        /// <remarks>
+        ///  DELETE: api/devices/{serialNumber}/prescriptions/{id}
+        /// </remarks>
+        /// <returns> status code with optional error message</returns>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<PrescriptionViewModel>> DeletePrescription([FromRoute] string serialNumber, [FromRoute] int id)
         {
 

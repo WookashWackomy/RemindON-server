@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>RemindONServer</name>
+    </assembly>
+    <members>
+        <member name="M:RemindONServer.Controllers.PrescriptionsController.ChangePrescription(System.String,System.Int32,RemindONServer.Domain.Models.PrescriptionViewModel)">
+            <summary>
+            changes the data of a prescription
+            </summary>
+            <remarks>
+             PUT: api/devices/125246234436424/prescriptions/{id}
+             {
+            	"text1": "print pies2",
+            	"text2": "print php2",
+            	"weekDays": [
+            		2,
+            		3,
+            		6
+            	],
+            	"dayTimes": [
+            		"09:00:00",
+            		"11:00:00",
+            		"13:00:00"
+            	]
+              }
+            </remarks>
+            <returns> status code with optional error message</returns>
+        </member>
+        <member name="M:RemindONServer.Controllers.PrescriptionsController.DeletePrescription(System.String,System.Int32)">
+            <summary>
+            Deletes a prescription
+            </summary>
+            <remarks>
+             DELETE: api/devices/{serialNumber}/prescriptions/{id}
+            </remarks>
+            <returns> status code with optional error message</returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:RemindONServer.Controllers.UserController.RegisterUser(RemindONServer.Domain.Models.RegisterViewModel)" -->
+        <member name="M:RemindONServer.Domain.Services.Communication.RepositoryPrescriptionResponse.#ctor(RemindONServer.Domain.Models.Prescription)">
+            <summary>
+            Creates a success response.
+            </summary>
+            <param name="prescription">Saved prescription.</param>
+            <returns>Response.</returns>
+        </member>
+        <member name="M:RemindONServer.Domain.Services.Communication.RepositoryPrescriptionResponse.#ctor(RemindONServer.Domain.Services.Communication.RepositoryResponse,System.String)">
+            <summary>
+            Creates am error response.
+            </summary>
+            <param name="message">Error message.</param>
+            <returns>Response.</returns>
+        </member>
+    </members>
+</doc>
