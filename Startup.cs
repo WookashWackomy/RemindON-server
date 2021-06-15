@@ -64,8 +64,6 @@ namespace RemindONServer
             })
              .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            //services.AddIdentityCore<RemindONDevice>().AddEntityFrameworkStores<ApplicationDbContext>();
-
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
@@ -103,6 +101,8 @@ namespace RemindONServer
 
             services.AddScoped<IAuthorizationHandler, ShouldBeAnUserRequirementHandler>();
 
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
             services.AddScoped<IPrescriptionsService, PrescriptionService>();
 

@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace RemindONServer.Domain.Services.Communication
 {
-    public class SavePrescriptionResponse : BaseResponse
+    public class RepositoryPrescriptionResponse : BaseResponse
     {
         public Prescription Prescription { get; private set; }
 
-        private SavePrescriptionResponse(bool success, string message, Prescription prescription) : base(success, message)
+        private RepositoryPrescriptionResponse(RepositoryResponse repositoryResponse, string message, Prescription prescription) : base(repositoryResponse, message)
         {
             Prescription = prescription;
         }
@@ -20,7 +20,7 @@ namespace RemindONServer.Domain.Services.Communication
         /// </summary>
         /// <param name="prescription">Saved prescription.</param>
         /// <returns>Response.</returns>
-        public SavePrescriptionResponse(Prescription prescription) : this(true, string.Empty, prescription)
+        public RepositoryPrescriptionResponse(Prescription prescription) : this(RepositoryResponse.Success, string.Empty, prescription)
         { }
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace RemindONServer.Domain.Services.Communication
         /// </summary>
         /// <param name="message">Error message.</param>
         /// <returns>Response.</returns>
-        public SavePrescriptionResponse(string message) : this(false, message, null)
+        public RepositoryPrescriptionResponse(RepositoryResponse repositoryResponse, string message) : this(repositoryResponse, message, null)
         { }
     }
 }

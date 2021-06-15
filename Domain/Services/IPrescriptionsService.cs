@@ -10,6 +10,8 @@ namespace RemindONServer.Domain.Services
     public interface IPrescriptionsService
     {
         Task<IEnumerable<Prescription>> ListAsync();
-        Task<SavePrescriptionResponse> SaveAsync(Prescription prescription);
+        Task<RepositoryPrescriptionResponse> SaveAsync(Prescription prescription);
+        Task<RepositoryPrescriptionResponse> UpdateAsync(int id, Prescription category);
+        Task<RepositoryPrescriptionResponse> DeleteAsync(int id);
     }
 }

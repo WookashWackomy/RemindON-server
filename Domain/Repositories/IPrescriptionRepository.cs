@@ -10,5 +10,8 @@ namespace RemindONServer.Domain.Repositories
     {
         Task<IEnumerable<Prescription>> ListAsync(); 
         Task AddAsync(Prescription prescription);
+        Task<Prescription> FindByIdAsync(int id);
+        void Update(Prescription prescription);
+        void Remove(Prescription prescription);
     }
 }

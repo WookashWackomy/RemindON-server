@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using RemindONServer.Domain.Services;
 using RemindONServer.Domain.Persistence.Contexts;
+using RemindONServer.Domain.Models.ModelMappers;
+using RemindONServer.Domain.Services.Communication;
 
 namespace RemindONServer.Controllers
 {
@@ -49,12 +51,13 @@ namespace RemindONServer.Controllers
             return Ok(_context.Prescriptions.Where(p => p.DeviceSerialNumber == serialNumber)
                 .AsEnumerable()
                 .Select(p => new PrescriptionViewModel
-            {
-                text1 = p.text1,
-                text2 = p.text2,
-                WeekDays = p.WeekDays,
-                DayTimes = p.DayTimes.Select(ts => ts.ToString())
-            }));
+                {
+                    ID = p.ID,
+                    text1 = p.text1,
+                    text2 = p.text2,
+                    WeekDays = p.WeekDays,
+                    DayTimes = p.DayTimes.Select(ts => ts.ToString())
+                }));
         }
 
         // GET: api/devices/{serialNumber}/prescriptions/{id}
@@ -67,6 +70,7 @@ namespace RemindONServer.Controllers
 
             return Ok(new PrescriptionViewModel
             {
+                ID = prescription.ID,
                 text1 = prescription.text1,
                 text2 = prescription.text2,
                 WeekDays = prescription.WeekDays,
@@ -76,17 +80,14 @@ namespace RemindONServer.Controllers
 
         // PUT: api/devices/{serialNumber}/prescriptions/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult<PrescriptionViewModel>> GetPrescription([FromRoute] string serialNumber, [FromRoute] int id, [FromBody] PrescriptionViewModel prescriptionViewModel)
+        public async Task<ActionResult<PrescriptionViewModel>> GetPrescription([FromRoute] string serialNumber, [FromRoute] int id, [FromBody] PrescriptionViewModel prescriptionViewModel) 
         {
-            var prescription = _context.Prescriptions.FirstOrDefault(p => p.DeviceSerialNumber == serialNumber && p.ID == id);
-            if (prescription == null)
-                return NotFound();
+            if (!ModelState.IsValid)
+                return BadRequest("Not a valid model");
 
-            prescription.text1 = prescription.text1;
-            prescription.text2 = prescription.text2;
-            prescription.WeekDays = prescription.WeekDays;
-            prescription.DayTimes = prescription.DayTimes;
-            await _context.SaveChangesAsync();
+            var repositoryResponse = await _prescriptionsService.UpdateAsync(id,PrescriptionModelMapper.MapFromViewModel(prescriptionViewModel));
+            if (repositoryResponse.RepositoryResponse == RepositoryResponse.NotFound) return NotFound();
+            if (repositoryResponse.RepositoryResponse == RepositoryResponse.Error) return StatusCode(StatusCodes.Status500InternalServerError, repositoryResponse.Message);
 
             return StatusCode(StatusCodes.Status200OK);
         }
@@ -95,11 +96,10 @@ namespace RemindONServer.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<PrescriptionViewModel>> DeletePrescription([FromRoute] string serialNumber, [FromRoute] int id)
         {
-            var prescription = _context.Prescriptions.FirstOrDefault(p => p.DeviceSerialNumber == serialNumber && p.ID == id);
-            if (prescription == null)
-                return NotFound();
-            _context.Prescriptions.Remove(prescription);
-            await _context.SaveChangesAsync();
+
+            var repositoryResponse = await _prescriptionsService.DeleteAsync(id);
+            if (repositoryResponse.RepositoryResponse == RepositoryResponse.NotFound) return NotFound();
+            if (repositoryResponse.RepositoryResponse == RepositoryResponse.Error) return StatusCode(StatusCodes.Status500InternalServerError, repositoryResponse.Message);
 
             return StatusCode(StatusCodes.Status200OK);
         }
@@ -118,7 +118,7 @@ namespace RemindONServer.Controllers
                 PrescriptionID = c.PrescriptionID,
                 Flag = Convert.ToInt32(c.Flag)
             }));
-        }        
+        }
 
         //POST: api/devices/{serialNumber}/prescriptions
         [HttpPost]

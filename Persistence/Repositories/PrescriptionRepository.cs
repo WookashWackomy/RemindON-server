@@ -19,12 +19,28 @@ namespace RemindONServer.Persistence.Repositories
 
         public async Task<IEnumerable<Prescription>> ListAsync()
         {
-            return await _context.Prescriptions.ToListAsync();
+            return await _context.Prescriptions
+                                 .AsNoTracking()
+                                 .ToListAsync();
         }
 
         public async Task AddAsync(Prescription prescription)
         {
             await _context.Prescriptions.AddAsync(prescription);
+        }
+        public async Task<Prescription> FindByIdAsync(int id)
+        {
+            return await _context.Prescriptions.FindAsync(id);
+        }
+
+        public void Update(Prescription prescription)
+        {
+            _context.Prescriptions.Update(prescription);
+        }
+
+        public void Remove(Prescription prescription)
+        {
+            _context.Prescriptions.Remove(prescription);
         }
     }
 }
