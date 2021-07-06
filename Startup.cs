@@ -93,10 +93,11 @@ namespace RemindONServer
 
             services.AddCors(o => o.AddPolicy(AllowSpecificOriginsPolicy,
                       builder =>
-                        builder.WithOrigins("http://localhost:3000", "https://localhost:3000", "https://dev01-remindon.netlify.app/", "http://dev01-remindon.netlify.app/")
+                        builder//.WithOrigins("http://localhost:3000", "https://localhost:3000", "https://dev01-remindon.netlify.app", "http://dev01-remindon.netlify.app")
                       .AllowAnyMethod()
                        .AllowAnyHeader()
                        .AllowCredentials()
+                       .SetIsOriginAllowed(_ => true)
                       ));
 
             services.AddScoped<IAuthorizationHandler, ShouldBeAnUserRequirementHandler>();
