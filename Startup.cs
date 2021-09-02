@@ -102,8 +102,6 @@ namespace RemindONServer
 
             services.AddScoped<IAuthorizationHandler, ShouldBeAnUserRequirementHandler>();
 
-
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
             services.AddScoped<IPrescriptionsService, PrescriptionService>();
 

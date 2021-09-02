@@ -1,4 +1,6 @@
-﻿using RemindONServer.Domain.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using RemindONServer.Domain.Models;
+using RemindONServer.Domain.Persistence.Contexts;
 using RemindONServer.Domain.Repositories;
 using RemindONServer.Domain.Services.Communication;
 using System;
@@ -11,75 +13,83 @@ namespace RemindONServer.Domain.Services
     //TODO exception logger
     public class PrescriptionService : IPrescriptionsService
     {
-        private readonly IPrescriptionRepository _prescriptionRepository;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly ApplicationDbContext _context;
 
-        public PrescriptionService(IPrescriptionRepository categoryRepository, IUnitOfWork unitOfWork)
+        public PrescriptionService(ApplicationDbContext context)
         {
-            _prescriptionRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<IEnumerable<Prescription>> ListAsync()
+        public async Task<RepositoryResponse<IEnumerable<Prescription>>> ListAsync()
         {
-            return await _prescriptionRepository.ListAsync();
+            return new RepositoryResponse<IEnumerable<Prescription>>(await _context.Prescriptions.ToListAsync());
+        }
+        public async Task<RepositoryResponse<IEnumerable<Prescription>>> ListByDeviceSerialNumberAsync(string serialNumber)
+        {
+            return new RepositoryResponse<IEnumerable<Prescription>>(await _context.Prescriptions.Where(p => p.DeviceSerialNumber == serialNumber).ToListAsync());
+        }
+        public async Task<RepositoryResponse<IEnumerable<Prescription>>> ListByDeviceSerialNumberAndDayOfWeekAsync(string serialNumber, DayOfWeek dayOfWeek)
+        {
+            return new RepositoryResponse<IEnumerable<Prescription>>(await _context.Prescriptions.Where(p => p.DeviceSerialNumber == serialNumber && p.WeekDays.Contains(dayOfWeek)).ToListAsync());
         }
 
-        public async Task<RepositoryPrescriptionResponse> SaveAsync(Prescription prescription)
+        public async Task<RepositoryResponse<Prescription>> GetByIdAsync(int id)
         {
             try
             {
-                await _prescriptionRepository.AddAsync(prescription);
-                await _unitOfWork.CompleteAsync();
-
-                return new RepositoryPrescriptionResponse(prescription);
-            }
-            catch (Exception ex)
+                var prescription = await _context.Prescriptions.FirstAsync(p => p.ID == id);
+                return new RepositoryResponse<Prescription>(prescription);
+            } catch (InvalidOperationException _)
             {
-                return new RepositoryPrescriptionResponse(RepositoryResponse.Error,$"An error occurred when saving the prescription: {ex.Message}");
+                return new RepositoryResponse<Prescription>(RepositoryResponseType.NotFound, "Prescription not found.");
             }
         }
 
-        public async Task<RepositoryPrescriptionResponse> UpdateAsync(int id, Prescription prescription)
+        public async Task<RepositoryResponse<Prescription>> SaveAsync(Prescription prescription)
         {
-            var existingPrescription = await _prescriptionRepository.FindByIdAsync(id);
+            try
+            {
+                await _context.Prescriptions.AddAsync(prescription);
+                await _context.SaveChangesAsync();
+                return new RepositoryResponse<Prescription>(prescription);
+            }
+            catch (Exception ex)
+            {
+                return new RepositoryResponse<Prescription>(RepositoryResponseType.Error, $"An error occurred when saving the prescription: {ex.Message}");
+            }
+        }
 
-            if (existingPrescription == null)
-                return new RepositoryPrescriptionResponse(RepositoryResponse.NotFound,"Category not found.");
+        public async Task<RepositoryResponse<Prescription>> UpdateAsync(int id, Prescription prescription)
+        {
+            var existingPrescription = (await GetByIdAsync(id)).Resource;
 
-            existingPrescription.text1 = prescription.text1;
+            try
+            {
+                existingPrescription.text1 = prescription.text1;
             existingPrescription.text2 = prescription.text2;
             existingPrescription.WeekDays = prescription.WeekDays;
             existingPrescription.DayTimes = prescription.DayTimes;
-
-            try
-            {
-                await _unitOfWork.CompleteAsync();
-
-                return new RepositoryPrescriptionResponse(existingPrescription);
+                await _context.SaveChangesAsync();
+                return new RepositoryResponse<Prescription>(existingPrescription);
             }
             catch (Exception ex)
             {
-                return new RepositoryPrescriptionResponse(RepositoryResponse.Error, $"An error occurred when updating the category: {ex.Message}");
+                return new RepositoryResponse<Prescription>(RepositoryResponseType.Error, $"An error occurred when updating the category: {ex.Message}");
             }
         }
-        public async Task<RepositoryPrescriptionResponse> DeleteAsync(int id)
+        public async Task<RepositoryResponse<Prescription>> DeleteAsync(int id)
         {
-            var existingCategory = await _prescriptionRepository.FindByIdAsync(id);
-
-            if (existingCategory == null)
-                return new RepositoryPrescriptionResponse(RepositoryResponse.NotFound, "Category not found.");
-
+            var existingPrescription = (await GetByIdAsync(id)).Resource;
             try
             {
-                _prescriptionRepository.Remove(existingCategory);
-                await _unitOfWork.CompleteAsync();
+                _context.Prescriptions.Remove(existingPrescription);
+                await _context.SaveChangesAsync();
 
-                return new RepositoryPrescriptionResponse(existingCategory);
+                return new RepositoryResponse<Prescription>(existingPrescription);
             }
             catch (Exception ex)
             {
-                return new RepositoryPrescriptionResponse(RepositoryResponse.Error, $"An error occurred when deleting the category: {ex.Message}");
+                return new RepositoryResponse<Prescription>(RepositoryResponseType.Error, $"An error occurred when deleting the category: {ex.Message}");
             }
         }
     }

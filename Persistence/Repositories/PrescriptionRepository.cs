@@ -7,11 +7,12 @@ using RemindONServer.Persistence.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace RemindONServer.Persistence.Repositories
 {
-    public class PrescriptionRepository : BaseRepository, IPrescriptionRepository
+    public class PrescriptionRepository : BaseRepository<Prescription>, IPrescriptionRepository
     {
         public PrescriptionRepository(ApplicationDbContext context) : base(context)
         {
@@ -19,9 +20,7 @@ namespace RemindONServer.Persistence.Repositories
 
         public async Task<IEnumerable<Prescription>> ListAsync()
         {
-            return await _context.Prescriptions
-                                 .AsNoTracking()
-                                 .ToListAsync();
+            return await _context.Prescriptions.ToListAsync();
         }
 
         public async Task AddAsync(Prescription prescription)

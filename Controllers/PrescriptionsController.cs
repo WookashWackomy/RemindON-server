@@ -16,6 +16,8 @@ using RemindONServer.Domain.Services.Communication;
 
 namespace RemindONServer.Controllers
 {
+
+    //TODO filtr na serialNumber
     [Produces("application/json")]
     [Route("api/devices/{serialNumber}/prescriptions")] //TODO switch to api/prescriptions with query params
     [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
@@ -32,14 +34,24 @@ namespace RemindONServer.Controllers
             _prescriptionsService = prescriptionsService ?? throw new ArgumentNullException(nameof(prescriptionsService));
         }
 
-        // GET: api/devices/{serialNumber}/prescriptions?date=2021-09-10
+        /// <summary>
+        /// Get list of prescriptions for logged user
+        /// </summary>
+        /// <remarks>
+        /// GET: api/devices/{serialNumber}/prescriptions?date=2021-09-10
+        /// </remarks>
+        /// <param name="serialNumber">device serial number</param>
+        /// <param name="date">date to filter prescriptions by</param>
+        /// <returns> list of prescriptions</returns>
         [HttpGet()]
+        [ProducesResponseType(typeof(IEnumerable<PrescriptionViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(void), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<PrescriptionViewModel>>> GetPrescriptions([FromRoute] string serialNumber, [FromQuery] string date)
         {
             if (Enum.TryParse<DayOfWeek>(date, out var dayOfWeek))
             {
-                return Ok(_context.Prescriptions.Where(p => p.DeviceSerialNumber == serialNumber && p.WeekDays.Contains(dayOfWeek))
-                .AsEnumerable()
+                return Ok((await _prescriptionsService.ListByDeviceSerialNumberAndDayOfWeekAsync(serialNumber,dayOfWeek)).Resource
                 .Select(p => new PrescriptionViewModel
                 {
                     text1 = p.text1,
@@ -49,8 +61,7 @@ namespace RemindONServer.Controllers
                 }));
             }
 
-            return Ok(_context.Prescriptions.Where(p => p.DeviceSerialNumber == serialNumber)
-                .AsEnumerable()
+            return Ok((await _prescriptionsService.ListByDeviceSerialNumberAsync(serialNumber)).Resource
                 .Select(p => new PrescriptionViewModel
                 {
                     ID = p.ID,
@@ -61,10 +72,22 @@ namespace RemindONServer.Controllers
                 }));
         }
 
-        // GET: api/devices/{serialNumber}/prescriptions/{id}
+        /// <summary>
+        /// Get prescription
+        /// </summary>
+        /// <remarks>
+        /// GET: api/devices/{serialNumber}/prescriptions/{id}
+        /// </remarks>
+        /// <param name="serialNumber">device serial number</param>
+        /// <param name="id">id of prescription</param>
+        /// <returns> list of prescriptions</returns>
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(PrescriptionViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(void), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<PrescriptionViewModel>> GetPrescription([FromRoute] string serialNumber, [FromRoute] int id)
         {
+            var repositoryResponse = await _prescriptionsService.GetByIdAsync(id);
             var prescription = _context.Prescriptions.FirstOrDefault(p => p.DeviceSerialNumber == serialNumber && p.ID == id);
             if (prescription == null)
                 return NotFound();
@@ -78,6 +101,8 @@ namespace RemindONServer.Controllers
                 DayTimes = prescription.DayTimes.Select(ts => ts.ToString())
             });
         }
+
+
         /// <summary>
         /// changes the data of a prescription
         /// </summary>
@@ -110,8 +135,8 @@ namespace RemindONServer.Controllers
                 return BadRequest("Not a valid model");
 
             var repositoryResponse = await _prescriptionsService.UpdateAsync(id, PrescriptionModelMapper.MapFromViewModel(prescriptionViewModel));
-            if (repositoryResponse.RepositoryResponse == RepositoryResponse.NotFound) return NotFound();
-            if (repositoryResponse.RepositoryResponse == RepositoryResponse.Error) return StatusCode(StatusCodes.Status500InternalServerError, repositoryResponse.Message);
+            if (repositoryResponse.RepositoryResponseType == RepositoryResponseType.NotFound) return NotFound();
+            if (repositoryResponse.RepositoryResponseType == RepositoryResponseType.Error) return StatusCode(StatusCodes.Status500InternalServerError, repositoryResponse.Message);
 
             return StatusCode(StatusCodes.Status200OK);
         }
@@ -124,15 +149,15 @@ namespace RemindONServer.Controllers
         /// </remarks>
         /// <returns> status code with optional error message</returns>
         [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(void), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<PrescriptionViewModel>> DeletePrescription([FromRoute] string serialNumber, [FromRoute] int id)
         {
 
             var repositoryResponse = await _prescriptionsService.DeleteAsync(id);
-            if (repositoryResponse.RepositoryResponse == RepositoryResponse.NotFound) return NotFound();
-            if (repositoryResponse.RepositoryResponse == RepositoryResponse.Error) return StatusCode(StatusCodes.Status500InternalServerError, repositoryResponse.Message);
+            if (repositoryResponse.RepositoryResponseType == RepositoryResponseType.NotFound) return NotFound();
+            if (repositoryResponse.RepositoryResponseType == RepositoryResponseType.Error) return StatusCode(StatusCodes.Status500InternalServerError, repositoryResponse.Message);
 
             return StatusCode(StatusCodes.Status200OK);
         }
@@ -141,11 +166,11 @@ namespace RemindONServer.Controllers
         [HttpGet("{id}/checks")]
         public async Task<ActionResult<IEnumerable<CheckViewModel>>> GetChecksForPrescription([FromRoute] string serialNumber, [FromRoute] int id)
         {
-            var prescription = _context.Prescriptions.FirstOrDefault(p => p.DeviceSerialNumber == serialNumber && p.ID == id);
-            if (prescription == null)
-                return NotFound();
+            var repositoryResponse = (await _prescriptionsService.GetByIdAsync(id));
+            if (repositoryResponse.RepositoryResponseType == RepositoryResponseType.NotFound) return NotFound();
+            if (repositoryResponse.RepositoryResponseType == RepositoryResponseType.Error) return StatusCode(StatusCodes.Status500InternalServerError, repositoryResponse.Message);
 
-            return Ok(_context.Checks.Where(c => c.PrescriptionID == prescription.ID).Select(c => new CheckViewModel
+            return Ok(_context.Checks.Where(c => c.PrescriptionID == repositoryResponse.Resource.ID).Select(c => new CheckViewModel
             {
                 ID = c.ID,
                 PrescriptionID = c.PrescriptionID,
@@ -164,7 +189,7 @@ namespace RemindONServer.Controllers
                 return NotFound();
             }
 
-            await _context.Prescriptions.AddAsync(new Prescription
+            await _prescriptionsService.SaveAsync(new Prescription
             {
                 DeviceSerialNumber = serialNumber,
                 text1 = prescription.text1,
@@ -172,7 +197,6 @@ namespace RemindONServer.Controllers
                 WeekDays = prescription.WeekDays,
                 DayTimes = prescription.DayTimes.Select(ts => TimeSpan.Parse(ts)).ToList()
             });
-            await _context.SaveChangesAsync();
 
             return StatusCode(StatusCodes.Status201Created);
         }

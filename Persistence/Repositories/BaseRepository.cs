@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RemindONServer.Persistence.Repositories
 {
-    public abstract class BaseRepository
+    public abstract class BaseRepository<T>
     {
         protected readonly ApplicationDbContext _context;
 
