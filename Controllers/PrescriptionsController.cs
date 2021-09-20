@@ -88,17 +88,16 @@ namespace RemindONServer.Controllers
         public async Task<ActionResult<PrescriptionViewModel>> GetPrescription([FromRoute] string serialNumber, [FromRoute] int id)
         {
             var repositoryResponse = await _prescriptionsService.GetByIdAsync(id);
-            var prescription = _context.Prescriptions.FirstOrDefault(p => p.DeviceSerialNumber == serialNumber && p.ID == id);
-            if (prescription == null)
+            if (repositoryResponse.RepositoryResponseType == RepositoryResponseType.NotFound) ;
                 return NotFound();
 
             return Ok(new PrescriptionViewModel
             {
-                ID = prescription.ID,
-                text1 = prescription.text1,
-                text2 = prescription.text2,
-                WeekDays = prescription.WeekDays,
-                DayTimes = prescription.DayTimes.Select(ts => ts.ToString())
+                ID = repositoryResponse.Resource.ID,
+                text1 = repositoryResponse.Resource.text1,
+                text2 = repositoryResponse.Resource.text2,
+                WeekDays = repositoryResponse.Resource.WeekDays,
+                DayTimes = repositoryResponse.Resource.DayTimes.Select(ts => ts.ToString())
             });
         }
 
